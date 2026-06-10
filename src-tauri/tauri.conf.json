@@ -2,7 +2,6 @@
   "build": {
     "beforeDevCommand": "echo 'Starting dev server...'",
     "beforeBuildCommand": "echo 'Building...'",
-    "devUrl": "http://localhost:1420",
     "distDir": "../src"
   },
   "package": {
@@ -12,13 +11,15 @@
   "tauri": {
     "allowlist": {
       "shell": {
-        "open": true,
-        "scope": ["explorer.exe", "https://*"]
+        "open": true
       }
     },
     "bundle": {
       "active": true,
-      "targets": "portable"
+      "identifier": "com.example.fileexplorer",
+      "targets": [
+        "nsis"
+      ]
     },
     "windows": [
       {
