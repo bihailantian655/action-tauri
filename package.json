@@ -5,13 +5,15 @@
   "scripts": {
     "dev": "tauri dev",
     "build": "tauri build",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "preview": "http-server src -p 8080"
   },
   "dependencies": {
     "@tauri-apps/api": "1.5.3"
   },
   "devDependencies": {
     "@tauri-apps/cli": "1.5.6",
+    "http-server": "^14.1.1",
     "typescript": "^5.0.0"
   }
 }
