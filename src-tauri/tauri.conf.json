@@ -1,7 +1,7 @@
 {
   "build": {
-    "beforeDevCommand": "echo 'Starting dev server...'",
-    "beforeBuildCommand": "echo 'Building...'",
+    "beforeDevCommand": "echo Starting dev...",
+    "beforeBuildCommand": "echo Building...",
     "distDir": "../src"
   },
   "package": {
@@ -10,23 +10,25 @@
   },
   "tauri": {
     "allowlist": {
+      "all": false,
       "shell": {
+        "all": false,
         "open": true
       }
     },
     "bundle": {
       "active": true,
+      "targets": "all",
       "identifier": "com.example.fileexplorer",
-      "targets": [
-        "nsis"
-      ]
+      "icon": []
     },
     "windows": [
       {
         "title": "File Explorer",
         "width": 800,
         "height": 600,
-        "resizable": true
+        "resizable": true,
+        "fullscreen": false
       }
     ]
   }

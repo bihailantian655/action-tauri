@@ -2,6 +2,7 @@
 name = "file_explorer"
 version = "1.0.0"
 description = "A Tauri app with file explorer and weather display"
+authors = ["you"]
 edition = "2021"
 
 [[bin]]
@@ -9,7 +10,7 @@ name = "file_explorer"
 path = "main.rs"
 
 [build-dependencies]
-tauri-build = { version = "1.5", features = [] }
+tauri-build = "1.5"
 
 [dependencies]
 tauri = { version = "1.5", features = ["shell-open"] }

@@ -8,10 +8,10 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.5.3"
+    "@tauri-apps/api": "1.5.3"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.5.6",
-    "typescript": "^5.4.5"
+    "@tauri-apps/cli": "1.5.6",
+    "typescript": "^5.0.0"
   }
 }
