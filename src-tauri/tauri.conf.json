@@ -1,7 +1,8 @@
 {
   "build": {
-    "beforeDevCommand": "echo Starting dev...",
+    "beforeDevCommand": "npm run preview",
     "beforeBuildCommand": "echo Building...",
+    "devPath": "http://localhost:8080",
     "distDir": "../src"
   },
   "package": {
@@ -28,7 +29,8 @@
         "width": 800,
         "height": 600,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "devtools": true
       }
     ]
   }
