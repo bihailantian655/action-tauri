@@ -20,7 +20,7 @@
       "active": true,
       "targets": "all",
       "identifier": "com.example.fileexplorer",
-      "icon": []
+      "icon": null
     },
     "windows": [
       {
