@@ -8,6 +8,7 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  CARGO_INCREMENTAL: 0
 
 jobs:
   build-windows:
@@ -24,17 +25,24 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Clean Cargo cache
+        run: |
+          Remove-Item -Recurse -Force $env:CARGO_HOME\registry\cache -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force $env:CARGO_HOME\registry\git -ErrorAction SilentlyContinue
+
       - name: Install Tauri CLI
         run: npm install -g @tauri-apps/cli@1.5.6
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build Tauri app
-        run: npm run build
+      - name: Clean previous build
+        run: |
+          if (Test-Path "src-tauri/target") {
+            Remove-Item -Recurse -Force "src-tauri/target"
+          }
 
-      - name: Build Tauri App0
-
+      - name: Build Tauri App
         run: npm run tauri build 
 
       - name: Upload exe artifact

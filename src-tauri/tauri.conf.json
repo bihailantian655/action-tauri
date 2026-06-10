@@ -14,13 +14,23 @@
       "shell": {
         "all": false,
         "open": true,
-        "execute": true
+        "execute": true,
+        "scope": [
+          {
+            "name": "cmd",
+            "cmd": "cmd",
+            "args": [
+              { "validator": "\\S*" }
+            ]
+          }
+        ]
       },
       "fs": {
         "all": false,
         "readFile": true,
         "writeFile": true,
-        "readDir": true
+        "readDir": true,
+        "scope": ["**"]
       }
     },
     "bundle": {
