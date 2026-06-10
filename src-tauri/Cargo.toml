@@ -4,6 +4,10 @@ version = "1.0.0"
 description = "A Tauri app with file explorer and weather display"
 edition = "2021"
 
+[[bin]]
+name = "file_explorer"
+path = "main.rs"
+
 [build-dependencies]
 tauri-build = { version = "1.5", features = [] }
 
