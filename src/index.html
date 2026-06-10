@@ -3,27 +3,166 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>文件资源管理器与天气00000</title>
+  <title>CC Switch</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Tauri 应用</h1>
-    <div class="buttons-container">
-      <button id="openExplorerBtn" class="btn btn-primary">
-        <span class="icon">📁</span>
-        打开文件资源管理器
-      </button>
-      <button id="openWeatherBtn" class="btn btn-secondary">
-        <span class="icon">🌤️</span>
-        打开天气网页
-      </button>
+  <div class="app-container">
+    <!-- 顶部导航栏 -->
+    <header class="header">
+      <div class="header-left">
+        <span class="app-icon">⚙️</span>
+        <span class="app-name">CC Switch</span>
+        <button class="nav-btn" id="settingsBtn" title="设置">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- 顶部功能按钮 -->
+      <div class="header-center">
+        <button class="nav-btn" title="功能1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+        </button>
+        <button class="nav-btn" title="功能2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </button>
+        <button class="nav-btn" title="功能3">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="9" y1="9" x2="15" y2="9"></line>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
+        </button>
+        <button class="nav-btn" title="功能4">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </button>
+        <button class="nav-btn" title="功能5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </button>
+        <button class="nav-btn" title="功能6">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 20V10"></path>
+            <path d="M8 20V4"></path>
+            <path d="M18 20a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- 添加按钮 -->
+      <div class="header-right">
+        <button class="add-btn" id="addConfigBtn" title="添加配置">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+    
+    <!-- 配置列表 -->
+    <main class="main-content">
+      <div class="config-list" id="configList">
+        <!-- 配置项会动态生成 -->
+      </div>
+    </main>
+    
+    <!-- 添加配置弹窗 -->
+    <div class="modal-overlay" id="addModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>添加配置</h3>
+          <button class="modal-close" id="closeModal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>名称</label>
+            <input type="text" id="configName" placeholder="请输入配置名称">
+          </div>
+          <div class="form-group">
+            <label>URL</label>
+            <input type="text" id="configUrl" placeholder="请输入URL地址">
+          </div>
+          <div class="form-group">
+            <label>图标</label>
+            <input type="text" id="configIcon" placeholder="输入emoji图标，如 🤖">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-cancel" id="cancelBtn">取消</button>
+          <button class="btn btn-confirm" id="confirmBtn">确认添加</button>
+        </div>
+      </div>
     </div>
-    <div id="weatherContainer" class="weather-container hidden">
-      <h2>当前天气</h2>
-      <div id="weatherContent">加载中...</div>
+    
+    <!-- 编辑配置弹窗 -->
+    <div class="modal-overlay" id="editModal">
+      <div class="modal resizable">
+        <div class="modal-header">
+          <h3>编辑配置</h3>
+          <button class="modal-close" id="closeEditModal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editId">
+          <div class="form-group">
+            <label>名称</label>
+            <input type="text" id="editName" placeholder="请输入配置名称">
+          </div>
+          <div class="form-group">
+            <label>文件夹路径</label>
+            <div class="folder-input-group">
+              <input type="text" id="editFolderPath" placeholder="请输入文件夹路径，如 C:\Scripts">
+              <button class="btn-refresh" id="refreshBatList" title="刷新列表">↻</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>选择脚本</label>
+            <div class="bat-list" id="batList">
+              <div class="bat-list-empty">请输入文件夹路径后点击刷新按钮</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>图标</label>
+            <input type="text" id="editIcon" placeholder="输入emoji图标">
+          </div>
+          <div class="form-group">
+            <label>脚本内容</label>
+            <textarea id="editNotes" placeholder="请选择或编辑 .bat 脚本内容..." rows="8"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-cancel" id="editCancelBtn">取消</button>
+          <button class="btn btn-confirm" id="editConfirmBtn">确认修改</button>
+        </div>
+      </div>
     </div>
   </div>
-  <script type="module" src="app.js"></script>
+  
+  <script src="app.js"></script>
 </body>
 </html>
