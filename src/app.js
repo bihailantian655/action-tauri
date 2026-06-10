@@ -201,13 +201,22 @@ async function loadBatFiles(folderPath, selectedFile = null) {
   try {
     let batFiles = [];
     
-    if (window.__TAURI__) {
+    if (window.__TAURI__ && window.__TAURI__.fs) {
       // Tauri 环境：使用 Rust 读取目录
-      const { readDir } = window.__TAURI__.fs;
+      const fs = window.__TAURI__.fs;
+      const readDir = fs.readDir || fs.read_dir;
+      
+      if (!readDir) {
+        throw new Error('文件系统 API 不可用，请检查 Tauri 配置');
+      }
+      
       const entries = await readDir(folderPath);
       batFiles = entries
         .filter(entry => entry.name && entry.name.endsWith('.bat'))
         .map(entry => entry.name);
+    } else if (window.__TAURI__) {
+      // Tauri 但 API 未配置
+      throw new Error('文件系统权限未启用，请检查 tauri.conf.json');
     } else {
       // 浏览器环境：使用演示数据
       batFiles = ['demo_script.bat', 'backup.bat', 'deploy.bat', 'cleanup.bat'];
@@ -245,7 +254,8 @@ async function loadBatFiles(folderPath, selectedFile = null) {
     });
     
   } catch (error) {
-    batList.innerHTML = `<div class="bat-list-empty">读取文件夹失败: ${error.message}</div>`;
+    batList.innerHTML = `<div class="bat-list-empty">${error.message}</div>`;
+    console.error('加载文件列表失败:', error);
   }
 }
 
