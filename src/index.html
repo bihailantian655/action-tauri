@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文件资源管理器与天气</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Tauri 应用</h1>
+    <div class="buttons-container">
+      <button id="openExplorerBtn" class="btn btn-primary">
+        <span class="icon">📁</span>
+        打开文件资源管理器
+      </button>
+      <button id="openWeatherBtn" class="btn btn-secondary">
+        <span class="icon">🌤️</span>
+        打开天气网页
+      </button>
+    </div>
+    <div id="weatherContainer" class="weather-container hidden">
+      <h2>当前天气</h2>
+      <div id="weatherContent">加载中...</div>
+    </div>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
