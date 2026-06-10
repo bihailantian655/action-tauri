@@ -1,6 +1,6 @@
 {
   "build": {
-    "beforeDevCommand": "echo Starting dev...",
+    "beforeDevCommand": "npm run preview",
     "beforeBuildCommand": "echo Building...",
     "distDir": "../src"
   },
