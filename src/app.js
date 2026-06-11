@@ -1,6 +1,56 @@
 // 配置数据存储
 let configs = [];
 
+// 获取 Tauri invoke API（多种兜底）
+function getTauriInvoke() {
+  if (!window.__TAURI__) return null;
+
+  // 1. withGlobalTauri 模式 (推荐)
+  if (window.__TAURI__.tauri?.invoke) {
+    return window.__TAURI__.tauri.invoke;
+  }
+
+  // 2. 旧的直接注入方式
+  if (window.__TAURI__.invoke) {
+    return window.__TAURI__.invoke;
+  }
+
+  // 3. 使用底层 __TAURI_IPC__ 手动封装 invoke
+  if (window.__TAURI_IPC__) {
+    const ipc = window.__TAURI_IPC__;
+    function uid() {
+      return window.crypto.getRandomValues(new Uint32Array(1))[0];
+    }
+    return function invokeViaIpc(cmd, args = {}) {
+      return new Promise((resolve, reject) => {
+        const cid = uid();
+        const eid = uid();
+        Object.defineProperty(window, `_${cid}`, {
+          value: (result) => {
+            resolve(result);
+            Reflect.deleteProperty(window, `_${cid}`);
+            Reflect.deleteProperty(window, `_${eid}`);
+          },
+          writable: false,
+          configurable: true
+        });
+        Object.defineProperty(window, `_${eid}`, {
+          value: (err) => {
+            reject(err);
+            Reflect.deleteProperty(window, `_${cid}`);
+            Reflect.deleteProperty(window, `_${eid}`);
+          },
+          writable: false,
+          configurable: true
+        });
+        ipc({ cmd, callback: cid, error: eid, ...args });
+      });
+    };
+  }
+
+  return null;
+}
+
 // 初始化数据
 function initData() {
   const saved = localStorage.getItem('ccswitch_configs');
@@ -147,10 +197,10 @@ async function runScript(id) {
     }
     
     try {
-      // 使用 Tauri API 执行命令
-      if (window.__TAURI__) {
+      // 使用 Tauri Shell API 执行命令
+      if (window.__TAURI__?.shell) {
         const { Command } = window.__TAURI__.shell;
-        const cmd = Command.create('cmd', ['/c', 'start', '', filePath]);
+        const cmd = new Command('cmd', ['/c', 'start', '', filePath]);
         await cmd.spawn();
         alert('脚本已启动！');
       } else {
@@ -202,31 +252,23 @@ async function loadBatFiles(folderPath, selectedFile = null) {
     let batFiles = [];
     
     // Tauri 环境：使用 invoke 调用 Rust 命令
-    if (window.__TAURI__) {
-      console.log('Tauri 环境检测到');
-      console.log('Tauri 对象:', Object.keys(window.__TAURI__));
-      
-      // Tauri 1.5: invoke 在 tauri.invoke
-      const invoke = window.__TAURI__.tauri?.invoke || window.__TAURI__.invoke;
-      
-      if (invoke) {
-        console.log('invoke API 可用，尝试调用 read_dir:', folderPath);
-        try {
-          const entries = await invoke('read_dir', { path: folderPath });
-          console.log('invoke 成功，返回:', entries);
-          
-          batFiles = entries
-            .filter(entry => entry.name && entry.name.endsWith('.bat'))
-            .map(entry => entry.name);
-        } catch (error) {
-          console.error('invoke 失败:', error);
-          throw new Error(`调用失败: ${error}`);
-        }
-      } else {
-        throw new Error('invoke API 不可用');
+    const invoke = getTauriInvoke();
+
+    if (invoke) {
+      console.log('invoke API 可用，尝试调用 read_dir:', folderPath);
+      try {
+        const entries = await invoke('read_dir', { path: folderPath });
+        console.log('invoke 成功，返回:', entries);
+
+        batFiles = entries
+          .filter(entry => entry.name && entry.name.endsWith('.bat'))
+          .map(entry => entry.name);
+      } catch (error) {
+        console.error('invoke 失败:', error);
+        throw new Error(`调用失败: ${error}`);
       }
     } else {
-      // 浏览器环境：使用演示数据
+      // 非 Tauri 环境：使用演示数据
       console.log('非 Tauri 环境，使用演示数据');
       batFiles = ['demo_script.bat', 'backup.bat', 'deploy.bat', 'cleanup.bat'];
     }
@@ -275,13 +317,9 @@ async function loadBatContent(filePath) {
   try {
     let content = '';
     
-    if (window.__TAURI__) {
-      const invoke = window.__TAURI__.tauri?.invoke || window.__TAURI__.invoke;
-      if (invoke) {
-        content = await invoke('read_text_file', { path: filePath });
-      } else {
-        content = '@echo off\nREM 演示脚本内容\nREM 在 Tauri 应用中运行时将显示实际内容\necho Hello World';
-      }
+    const invoke = getTauriInvoke();
+    if (invoke) {
+      content = await invoke('read_text_file', { path: filePath });
     } else {
       content = '@echo off\nREM 演示脚本内容\nREM 在 Tauri 应用中运行时将显示实际内容\necho Hello World';
     }
@@ -425,11 +463,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 如果选择了bat文件，保存内容到磁盘
     if (url && scriptContent) {
       try {
-        if (window.__TAURI__) {
-          const invoke = window.__TAURI__.tauri?.invoke || window.__TAURI__.invoke;
-          if (invoke) {
-            await invoke('write_text_file', { path: url, content: scriptContent });
-          }
+        const invoke = getTauriInvoke();
+        if (invoke) {
+          await invoke('write_text_file', { path: url, content: scriptContent });
         }
       } catch (error) {
         console.log('保存文件失败:', error);

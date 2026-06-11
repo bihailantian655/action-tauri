@@ -2,7 +2,8 @@
   "build": {
     "beforeDevCommand": "npm run preview",
     "beforeBuildCommand": "echo Building...",
-    "distDir": "../src"
+    "distDir": "../src",
+    "withGlobalTauri": true
   },
   "package": {
     "productName": "FileExplorer",
