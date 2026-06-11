@@ -281,12 +281,14 @@ async function loadBatFiles(folderPath, selectedFile = null) {
       return;
     }
     
-    batList.innerHTML = batFiles.map(file => `
+    batList.innerHTML = batFiles.map(file => {
+      const safeId = 'bat_' + file.replace(/[^a-zA-Z0-9_]/g, '_');
+      return `
       <div class="bat-item ${file === selectedFile ? 'selected' : ''}">
-        <input type="radio" name="batFile" value="${file}" id="bat_${file}" ${file === selectedFile ? 'checked' : ''}>
-        <label for="bat_${file}">${file}</label>
-      </div>
-    `).join('');
+        <input type="radio" name="batFile" value="${file}" id="${safeId}" ${file === selectedFile ? 'checked' : ''}>
+        <label for="${safeId}">${file}</label>
+      </div>`;
+    }).join('');
     
     // 添加点击事件
     batList.querySelectorAll('.bat-item').forEach(item => {

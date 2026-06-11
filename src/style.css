@@ -386,10 +386,13 @@ body {
   cursor: pointer;
   flex: 1;
   font-size: 13px;
+  font-weight: 400;
+  color: #333333;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 0;
+  min-width: 80px;
+  margin-bottom: 0;
 }
 
 /* 运行按钮样式 */
