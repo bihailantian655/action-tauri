@@ -451,6 +451,14 @@ body {
   cursor: not-allowed;
 }
 
+/* 图标选择器 */
+.icon-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+}
+
 .icon-option {
   display: flex;
   align-items: center;
