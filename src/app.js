@@ -226,6 +226,9 @@ async function openEditModal(id) {
     document.getElementById('editFolderPath').value = folderPath;
     
     document.getElementById('editIcon').value = config.icon;
+    // 设置图标选择器的选中状态
+    setIconPickerSelection(config.icon);
+    
     document.getElementById('editNotes').value = '';
     
     // 加载bat文件列表
@@ -376,6 +379,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initData();
   renderConfigList();
   
+  // 初始化图标选择器事件
+  initIconPicker();
+  
   // 添加配置按钮
   document.getElementById('addConfigBtn').addEventListener('click', () => {
     document.getElementById('configName').value = '';
@@ -500,3 +506,44 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+// Tauri invoke 辅助函数
+function getTauriInvoke() {
+  if (window.__TAURI__) {
+    return window.__TAURI__.tauri?.invoke || window.__TAURI__.invoke;
+  }
+  return null;
+}
+
+// 初始化图标选择器
+function initIconPicker() {
+  const iconPicker = document.getElementById('iconPicker');
+  if (!iconPicker) return;
+  
+  // 为每个图标选项添加点击事件
+  iconPicker.querySelectorAll('.icon-option').forEach(option => {
+    option.addEventListener('click', () => {
+      // 移除其他选中状态
+      iconPicker.querySelectorAll('.icon-option').forEach(opt => opt.classList.remove('selected'));
+      // 添加当前选中状态
+      option.classList.add('selected');
+      // 更新隐藏输入框的值
+      const icon = option.dataset.icon;
+      document.getElementById('editIcon').value = icon;
+    });
+  });
+}
+
+// 设置图标选择器选中状态
+function setIconPickerSelection(icon) {
+  const iconPicker = document.getElementById('iconPicker');
+  if (!iconPicker) return;
+  
+  iconPicker.querySelectorAll('.icon-option').forEach(option => {
+    if (option.dataset.icon === icon) {
+      option.classList.add('selected');
+    } else {
+      option.classList.remove('selected');
+    }
+  });
+}

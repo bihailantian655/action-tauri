@@ -379,12 +379,50 @@ body {
 .bat-item input[type="radio"] {
   margin-right: 10px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .bat-item label {
   cursor: pointer;
   flex: 1;
   font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* 图标选择器 */
+.icon-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.icon-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fafafa;
+}
+
+.icon-option:hover {
+  border-color: #007aff;
+  background: #e8f4fd;
+}
+
+.icon-option.selected {
+  border-color: #007aff;
+  background: #007aff;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
 }
 
 .modal-header {
