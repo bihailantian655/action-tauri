@@ -39,7 +39,7 @@
     },
     "bundle": {
       "active": true,
-      "targets": "target",
+      "targets": ["nsis"],
       "identifier": "com.example.bat-r",
       "icon": ["icons/icon.ico"]
     },
