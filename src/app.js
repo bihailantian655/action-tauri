@@ -303,6 +303,7 @@ async function loadBatFiles(folderPath, selectedFile = null) {
         // 启用脚本操作按钮
         document.getElementById('copyScriptBtn').disabled = false;
         document.getElementById('renameScriptBtn').disabled = false;
+        document.getElementById('deleteScriptBtn').disabled = false;
         
         // 加载选中文件的内容
         const fileName = item.querySelector('input').value;
@@ -584,6 +585,40 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('renameOldName').value = fileName;
     document.getElementById('renameNewName').value = nameWithoutExt;
     document.getElementById('renameModal').classList.add('show');
+  });
+  
+  // 删除脚本按钮
+  document.getElementById('deleteScriptBtn').addEventListener('click', async () => {
+    const selectedRadio = document.querySelector('input[name="batFile"]:checked');
+    if (!selectedRadio) return;
+    
+    const folderPath = document.getElementById('editFolderPath').value.trim();
+    const fileName = selectedRadio.value;
+    const filePath = `${folderPath}\\${fileName}`;
+    
+    if (!confirm(`确定要删除脚本 "${fileName}" 吗？此操作无法撤销！`)) {
+      return;
+    }
+    
+    try {
+      const invoke = getTauriInvoke();
+      if (invoke) {
+        await invoke('remove_file', { path: filePath });
+        await loadBatFiles(folderPath);
+        
+        // 重置脚本内容输入框
+        document.getElementById('editNotes').value = '';
+        
+        // 禁用脚本操作按钮
+        document.getElementById('copyScriptBtn').disabled = true;
+        document.getElementById('renameScriptBtn').disabled = true;
+        document.getElementById('deleteScriptBtn').disabled = true;
+        
+        alert(`已删除: ${fileName}`);
+      }
+    } catch (error) {
+      alert(`删除失败: ${error.message}`);
+    }
   });
   
   // 关闭重命名弹窗
