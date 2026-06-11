@@ -202,14 +202,29 @@ async function loadBatFiles(folderPath, selectedFile = null) {
     let batFiles = [];
     
     // Tauri 环境：使用 invoke 调用 Rust 命令
-    if (window.__TAURI__ && window.__TAURI__.invoke) {
-      const invoke = window.__TAURI__.invoke;
-      const entries = await invoke('read_dir', { path: folderPath });
-      batFiles = entries
-        .filter(entry => entry.name && entry.name.endsWith('.bat'))
-        .map(entry => entry.name);
+    if (window.__TAURI__) {
+      console.log('Tauri 环境检测到');
+      
+      if (window.__TAURI__.invoke) {
+        console.log('invoke API 可用，尝试调用 read_dir:', folderPath);
+        try {
+          const invoke = window.__TAURI__.invoke;
+          const entries = await invoke('read_dir', { path: folderPath });
+          console.log('invoke 成功，返回:', entries);
+          
+          batFiles = entries
+            .filter(entry => entry.name && entry.name.endsWith('.bat'))
+            .map(entry => entry.name);
+        } catch (error) {
+          console.error('invoke 失败:', error);
+          throw new Error(`调用失败: ${error}`);
+        }
+      } else {
+        throw new Error('invoke API 不可用');
+      }
     } else {
       // 浏览器环境：使用演示数据
+      console.log('非 Tauri 环境，使用演示数据');
       batFiles = ['demo_script.bat', 'backup.bat', 'deploy.bat', 'cleanup.bat'];
     }
     
@@ -245,8 +260,8 @@ async function loadBatFiles(folderPath, selectedFile = null) {
     });
     
   } catch (error) {
-    batList.innerHTML = `<div class="bat-list-empty">错误: ${error}</div>`;
     console.error('加载文件列表失败:', error);
+    batList.innerHTML = `<div class="bat-list-empty">错误: ${error.message || error}</div>`;
   }
 }
 
