@@ -50,12 +50,19 @@ fn write_text_file(path: String, content: String) -> Result<(), String> {
         .map_err(|e| format!("写入文件失败: {}", e))
 }
 
+#[tauri::command]
+fn remove_file(path: String) -> Result<(), String> {
+    fs::remove_file(&path)
+        .map_err(|e| format!("删除文件失败: {}", e))
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             read_dir,
             read_text_file,
-            write_text_file
+            write_text_file,
+            remove_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

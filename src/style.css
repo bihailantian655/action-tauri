@@ -392,12 +392,47 @@ body {
   min-width: 0;
 }
 
-/* 图标选择器 */
-.icon-picker {
+/* 运行按钮样式 */
+.run-bat-btn {
+  background: #00c853;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.run-bat-btn:hover {
+  background: #00b84d;
+}
+
+.run-bat-btn .btn-text {
+  font-size: 13px;
+}
+
+/* 脚本操作按钮 */
+.script-actions {
+  display: flex;
   gap: 8px;
-  max-width: 100%;
+  margin-top: 10px;
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #666666;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #e0e0e0;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .icon-option {

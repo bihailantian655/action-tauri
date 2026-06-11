@@ -23,6 +23,12 @@
       
       <!-- 顶部功能按钮 -->
       <div class="header-center">
+        <button class="nav-btn run-bat-btn" id="runBatBtn" title="运行 run.bat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span class="btn-text">运行</span>
+        </button>
         <button class="nav-btn" title="功能1">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 20h9"></path>
@@ -145,6 +151,10 @@
             <div class="bat-list" id="batList">
               <div class="bat-list-empty">请输入文件夹路径后点击刷新按钮</div>
             </div>
+            <div class="script-actions" id="scriptActions">
+              <button class="btn btn-secondary" id="copyScriptBtn" disabled>复制脚本</button>
+              <button class="btn btn-secondary" id="renameScriptBtn" disabled>重命名脚本</button>
+            </div>
           </div>
           <div class="form-group">
             <label>图标</label>
@@ -180,6 +190,32 @@
         <div class="modal-footer">
           <button class="btn btn-cancel" id="editCancelBtn">取消</button>
           <button class="btn btn-confirm" id="editConfirmBtn">确认修改</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 重命名脚本弹窗 -->
+    <div class="modal-overlay" id="renameModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>重命名脚本</h3>
+          <button class="modal-close" id="closeRenameModal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="renameOldName">
+          <div class="form-group">
+            <label>新文件名</label>
+            <input type="text" id="renameNewName" placeholder="请输入新的脚本名称（不含.bat扩展名）">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-cancel" id="renameCancelBtn">取消</button>
+          <button class="btn btn-confirm" id="renameConfirmBtn">确认重命名</button>
         </div>
       </div>
     </div>

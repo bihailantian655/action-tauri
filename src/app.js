@@ -300,6 +300,10 @@ async function loadBatFiles(folderPath, selectedFile = null) {
         batList.querySelectorAll('.bat-item').forEach(i => i.classList.remove('selected'));
         item.classList.add('selected');
         
+        // 启用脚本操作按钮
+        document.getElementById('copyScriptBtn').disabled = false;
+        document.getElementById('renameScriptBtn').disabled = false;
+        
         // 加载选中文件的内容
         const fileName = item.querySelector('input').value;
         const fullPath = `${folderPath}\\${fileName}`;
@@ -495,6 +499,140 @@ document.addEventListener('DOMContentLoaded', () => {
   // 设置按钮
   document.getElementById('settingsBtn').addEventListener('click', () => {
     alert('设置功能开发中...');
+  });
+  
+  // 运行程序本目录下的 run.bat
+  document.getElementById('runBatBtn').addEventListener('click', async () => {
+    try {
+      // 获取应用程序目录路径
+      let appDir = '';
+      if (window.__TAURI__?.path) {
+        appDir = await window.__TAURI__.path.appDir();
+      } else {
+        // 浏览器环境下使用当前目录
+        appDir = '.';
+      }
+      
+      const runBatPath = `${appDir}\\run.bat`;
+      
+      if (window.__TAURI__?.shell) {
+        const { Command } = window.__TAURI__.shell;
+        const cmd = new Command('cmd', ['/c', 'start', '', runBatPath]);
+        await cmd.spawn();
+        alert(`正在启动: ${runBatPath}`);
+      } else {
+        alert(`在 Tauri 应用中运行时将启动: ${runBatPath}`);
+      }
+    } catch (error) {
+      alert(`启动失败: ${error.message}`);
+    }
+  });
+  
+  // 复制脚本按钮
+  document.getElementById('copyScriptBtn').addEventListener('click', async () => {
+    const selectedRadio = document.querySelector('input[name="batFile"]:checked');
+    if (!selectedRadio) return;
+    
+    const folderPath = document.getElementById('editFolderPath').value.trim();
+    const fileName = selectedRadio.value;
+    const sourcePath = `${folderPath}\\${fileName}`;
+    
+    try {
+      const invoke = getTauriInvoke();
+      if (invoke) {
+        // 读取原文件内容
+        const content = await invoke('read_text_file', { path: sourcePath });
+        
+        // 生成新文件名
+        const nameWithoutExt = fileName.replace(/\.bat$/i, '');
+        let newFileName = `${nameWithoutExt}_copy.bat`;
+        let newFilePath = `${folderPath}\\${newFileName}`;
+        let counter = 1;
+        
+        // 检查文件是否存在，如果存在则添加数字
+        while (true) {
+          try {
+            await invoke('read_text_file', { path: newFilePath });
+            counter++;
+            newFileName = `${nameWithoutExt}_copy${counter}.bat`;
+            newFilePath = `${folderPath}\\${newFileName}`;
+          } catch {
+            break;
+          }
+        }
+        
+        // 写入新文件
+        await invoke('write_text_file', { path: newFilePath, content });
+        
+        // 刷新列表并选中新文件
+        await loadBatFiles(folderPath, newFileName);
+        alert(`已复制为: ${newFileName}`);
+      }
+    } catch (error) {
+      alert(`复制失败: ${error.message}`);
+    }
+  });
+  
+  // 重命名脚本按钮
+  document.getElementById('renameScriptBtn').addEventListener('click', () => {
+    const selectedRadio = document.querySelector('input[name="batFile"]:checked');
+    if (!selectedRadio) return;
+    
+    const fileName = selectedRadio.value;
+    const nameWithoutExt = fileName.replace(/\.bat$/i, '');
+    
+    document.getElementById('renameOldName').value = fileName;
+    document.getElementById('renameNewName').value = nameWithoutExt;
+    document.getElementById('renameModal').classList.add('show');
+  });
+  
+  // 关闭重命名弹窗
+  document.getElementById('closeRenameModal').addEventListener('click', () => {
+    document.getElementById('renameModal').classList.remove('show');
+  });
+  
+  document.getElementById('renameCancelBtn').addEventListener('click', () => {
+    document.getElementById('renameModal').classList.remove('show');
+  });
+  
+  // 确认重命名
+  document.getElementById('renameConfirmBtn').addEventListener('click', async () => {
+    const oldName = document.getElementById('renameOldName').value;
+    const newName = document.getElementById('renameNewName').value.trim();
+    
+    if (!newName) {
+      alert('请输入新文件名');
+      return;
+    }
+    
+    const folderPath = document.getElementById('editFolderPath').value.trim();
+    const oldPath = `${folderPath}\\${oldName}`;
+    const newPath = `${folderPath}\\${newName}.bat`;
+    
+    try {
+      const invoke = getTauriInvoke();
+      if (invoke) {
+        // 读取原文件内容
+        const content = await invoke('read_text_file', { path: oldPath });
+        
+        // 写入新文件
+        await invoke('write_text_file', { path: newPath, content });
+        
+        // 删除原文件（需要添加删除文件的命令）
+        try {
+          await invoke('remove_file', { path: oldPath });
+        } catch (error) {
+          console.log('删除原文件失败:', error);
+        }
+        
+        // 刷新列表
+        await loadBatFiles(folderPath);
+        document.getElementById('renameModal').classList.remove('show');
+        alert(`已重命名为: ${newName}.bat`);
+      }
+    } catch (error) {
+      alert(`重命名失败: ${error.message}`);
+    }
   });
   
   // 点击弹窗外部关闭
