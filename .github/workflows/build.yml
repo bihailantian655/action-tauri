@@ -52,10 +52,6 @@ jobs:
         run: npm install
 
       - name: Build Tauri app
-        run: npm run build
-
-      - name: Build Tauri App0
-
         run: npm run tauri build 
 
       - name: Upload exe artifact

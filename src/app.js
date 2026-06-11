@@ -680,14 +680,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Tauri invoke 辅助函数
-function getTauriInvoke() {
-  if (window.__TAURI__) {
-    return window.__TAURI__.tauri?.invoke || window.__TAURI__.invoke;
-  }
-  return null;
-}
-
 // 初始化图标选择器
 function initIconPicker() {
   const iconPicker = document.getElementById('iconPicker');
