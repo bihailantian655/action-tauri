@@ -1,7 +1,7 @@
 [package]
-name = "file_explorer"
+name = "bat_r"
 version = "1.0.0"
-description = "A Tauri app with file explorer and weather display"
+description = "BAT_R - Batch script manager"
 authors = ["you"]
 edition = "2021"
 resolver = "2"
@@ -10,7 +10,7 @@ resolver = "2"
 custom-protocol = []
 
 [[bin]]
-name = "file_explorer"
+name = "bat_r"
 path = "main.rs"
 
 [build-dependencies]

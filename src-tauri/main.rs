@@ -73,6 +73,15 @@ fn execute_script(path: String) -> Result<ExecuteResult, String> {
     let child = Command::new("cmd")
         .arg("/c")
         .arg(&path)
+        .spawn()
+        .map_err(|e| format!("启动脚本失败: {}", e))?;
+    
+    Ok(ExecuteResult { pid: child.id() })
+}
+    
+    let child = Command::new("cmd")
+        .arg("/c")
+        .arg(&path)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()
