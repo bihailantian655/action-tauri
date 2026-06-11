@@ -169,17 +169,17 @@ async function openEditModal(id) {
   if (config) {
     document.getElementById('editId').value = config.id;
     document.getElementById('editName').value = config.name;
-    document.getElementById('editFolderPath').value = config.folderPath || '';
+    
+    // 设置文件夹路径：优先使用保存的路径，否则使用默认值
+    const defaultPath = 'C:\\Users\\bihai\\Desktop\\cla';
+    const folderPath = config.folderPath || defaultPath;
+    document.getElementById('editFolderPath').value = folderPath;
+    
     document.getElementById('editIcon').value = config.icon;
     document.getElementById('editNotes').value = '';
     
-    // 如果有文件夹路径，加载bat文件列表
-    if (config.folderPath) {
-      await loadBatFiles(config.folderPath, config.url);
-    } else if (config.url && config.url.endsWith('.bat')) {
-      // 兼容旧数据：从文件路径提取文件夹
-      const folderPath = config.url.substring(0, config.url.lastIndexOf('\\'));
-      document.getElementById('editFolderPath').value = folderPath;
+    // 加载bat文件列表
+    if (folderPath) {
       await loadBatFiles(folderPath, config.url);
     } else {
       document.getElementById('batList').innerHTML = '<div class="bat-list-empty">请输入文件夹路径后点击刷新按钮</div>';
@@ -201,22 +201,13 @@ async function loadBatFiles(folderPath, selectedFile = null) {
   try {
     let batFiles = [];
     
-    if (window.__TAURI__ && window.__TAURI__.fs) {
-      // Tauri 环境：使用 Rust 读取目录
-      const fs = window.__TAURI__.fs;
-      const readDir = fs.readDir || fs.read_dir;
-      
-      if (!readDir) {
-        throw new Error('文件系统 API 不可用，请检查 Tauri 配置');
-      }
-      
-      const entries = await readDir(folderPath);
+    // Tauri 环境：使用 invoke 调用 Rust 命令
+    if (window.__TAURI__ && window.__TAURI__.invoke) {
+      const invoke = window.__TAURI__.invoke;
+      const entries = await invoke('read_dir', { path: folderPath });
       batFiles = entries
         .filter(entry => entry.name && entry.name.endsWith('.bat'))
         .map(entry => entry.name);
-    } else if (window.__TAURI__) {
-      // Tauri 但 API 未配置
-      throw new Error('文件系统权限未启用，请检查 tauri.conf.json');
     } else {
       // 浏览器环境：使用演示数据
       batFiles = ['demo_script.bat', 'backup.bat', 'deploy.bat', 'cleanup.bat'];
@@ -254,7 +245,7 @@ async function loadBatFiles(folderPath, selectedFile = null) {
     });
     
   } catch (error) {
-    batList.innerHTML = `<div class="bat-list-empty">${error.message}</div>`;
+    batList.innerHTML = `<div class="bat-list-empty">错误: ${error}</div>`;
     console.error('加载文件列表失败:', error);
   }
 }
@@ -266,16 +257,16 @@ async function loadBatContent(filePath) {
   try {
     let content = '';
     
-    if (window.__TAURI__) {
-      const { readTextFile } = window.__TAURI__.fs;
-      content = await readTextFile(filePath);
+    if (window.__TAURI__ && window.__TAURI__.invoke) {
+      const invoke = window.__TAURI__.invoke;
+      content = await invoke('read_text_file', { path: filePath });
     } else {
       content = '@echo off\nREM 演示脚本内容\nREM 在 Tauri 应用中运行时将显示实际内容\necho Hello World';
     }
     
     textarea.value = content;
   } catch (error) {
-    textarea.value = `// 读取文件失败: ${error.message}`;
+    textarea.value = `// 读取文件失败: ${error}`;
   }
 }
 
@@ -412,9 +403,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 如果选择了bat文件，保存内容到磁盘
     if (url && scriptContent) {
       try {
-        if (window.__TAURI__) {
-          const { writeTextFile } = window.__TAURI__.fs;
-          await writeTextFile(url, scriptContent);
+        if (window.__TAURI__ && window.__TAURI__.invoke) {
+          const invoke = window.__TAURI__.invoke;
+          await invoke('write_text_file', { path: url, content: scriptContent });
         }
       } catch (error) {
         console.log('保存文件失败:', error);
