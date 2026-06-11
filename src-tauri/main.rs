@@ -72,7 +72,7 @@ fn execute_script(path: String) -> Result<ExecuteResult, String> {
     
     let quoted = format!("\"{}\"", path);
     let child = Command::new("cmd")
-        .args(["/c", &quoted])
+        .args(["/c", "start", "", &quoted])
         .spawn()
         .map_err(|e| format!("启动脚本失败: {}", e))?;
     
