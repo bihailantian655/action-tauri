@@ -40,7 +40,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.example.bat_r",
+      "identifier": "com.example.bat-r",
       "icon": ["icons/icon.ico"]
     },
     "windows": [
