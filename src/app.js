@@ -204,11 +204,14 @@ async function loadBatFiles(folderPath, selectedFile = null) {
     // Tauri 环境：使用 invoke 调用 Rust 命令
     if (window.__TAURI__) {
       console.log('Tauri 环境检测到');
+      console.log('Tauri 对象:', Object.keys(window.__TAURI__));
       
-      if (window.__TAURI__.invoke) {
+      // Tauri 1.5: invoke 在 tauri.invoke
+      const invoke = window.__TAURI__.tauri?.invoke || window.__TAURI__.invoke;
+      
+      if (invoke) {
         console.log('invoke API 可用，尝试调用 read_dir:', folderPath);
         try {
-          const invoke = window.__TAURI__.invoke;
           const entries = await invoke('read_dir', { path: folderPath });
           console.log('invoke 成功，返回:', entries);
           
@@ -272,9 +275,13 @@ async function loadBatContent(filePath) {
   try {
     let content = '';
     
-    if (window.__TAURI__ && window.__TAURI__.invoke) {
-      const invoke = window.__TAURI__.invoke;
-      content = await invoke('read_text_file', { path: filePath });
+    if (window.__TAURI__) {
+      const invoke = window.__TAURI__.tauri?.invoke || window.__TAURI__.invoke;
+      if (invoke) {
+        content = await invoke('read_text_file', { path: filePath });
+      } else {
+        content = '@echo off\nREM 演示脚本内容\nREM 在 Tauri 应用中运行时将显示实际内容\necho Hello World';
+      }
     } else {
       content = '@echo off\nREM 演示脚本内容\nREM 在 Tauri 应用中运行时将显示实际内容\necho Hello World';
     }
@@ -418,9 +425,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // 如果选择了bat文件，保存内容到磁盘
     if (url && scriptContent) {
       try {
-        if (window.__TAURI__ && window.__TAURI__.invoke) {
-          const invoke = window.__TAURI__.invoke;
-          await invoke('write_text_file', { path: url, content: scriptContent });
+        if (window.__TAURI__) {
+          const invoke = window.__TAURI__.tauri?.invoke || window.__TAURI__.invoke;
+          if (invoke) {
+            await invoke('write_text_file', { path: url, content: scriptContent });
+          }
         }
       } catch (error) {
         console.log('保存文件失败:', error);
