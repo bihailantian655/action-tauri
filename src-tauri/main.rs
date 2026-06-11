@@ -70,15 +70,22 @@ fn execute_script(path: String) -> Result<ExecuteResult, String> {
         return Err(format!("脚本文件不存在: {}", path));
     }
     
-    let child = Command::new("powershell")
-        .arg("-Command")
-        .arg(&format!(". '{}'", path))
+    let child = Command::new("cmd")
+        .arg("/c")
+        .arg(&path)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()
         .map_err(|e| format!("启动脚本失败: {}", e))?;
     
     Ok(ExecuteResult { pid: child.id() })
+}
+
+#[tauri::command]
+fn get_exe_dir() -> Result<String, String> {
+    std::env::current_exe()
+        .map(|p| p.parent().unwrap_or(Path::new(".")).to_string_lossy().to_string())
+        .map_err(|e| format!("获取程序目录失败: {}", e))
 }
 
 #[tauri::command]
@@ -107,7 +114,8 @@ fn main() {
             write_text_file,
             remove_file,
             execute_script,
-            kill_process
+            kill_process,
+            get_exe_dir
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

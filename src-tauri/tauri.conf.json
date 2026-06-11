@@ -6,7 +6,7 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "FileExplorer",
+    "productName": "BAT_R",
     "version": "1.0.0"
   },
   "tauri": {
@@ -32,17 +32,20 @@
         "writeFile": true,
         "readDir": true,
         "scope": ["**"]
+      },
+      "path": {
+        "all": true
       }
     },
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.example.fileexplorer",
+      "identifier": "com.example.bat_r",
       "icon": ["icons/icon.ico"]
     },
     "windows": [
       {
-        "title": "File Explorer",
+        "title": "BAT_R",
         "width": 800,
         "height": 600,
         "resizable": true,

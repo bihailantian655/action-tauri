@@ -200,14 +200,11 @@ async function runScript(id) {
     }
     
     try {
-      // 使用 Tauri Shell API 执行命令
-      if (window.__TAURI__?.shell) {
-        const { Command } = window.__TAURI__.shell;
-        const cmd = new Command('cmd', ['/c', 'start', '', filePath]);
-        await cmd.spawn();
+      const invoke = getTauriInvoke();
+      if (invoke) {
+        await invoke('execute_script', { path: filePath });
         alert('脚本已启动！');
       } else {
-        // 浏览器环境下提示
         alert(`已打开脚本: ${filePath}\n\n在 Tauri 应用中运行时将自动执行此脚本。`);
       }
     } catch (error) {
@@ -524,21 +521,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // 运行程序本目录下的 run.bat
   document.getElementById('runBatBtn').addEventListener('click', async () => {
     try {
-      // 获取应用程序目录路径
+      const invoke = getTauriInvoke();
       let appDir = '';
-      if (window.__TAURI__?.path) {
-        appDir = await window.__TAURI__.path.appDir();
+      
+      if (invoke) {
+        appDir = await invoke('get_exe_dir');
       } else {
-        // 浏览器环境下使用当前目录
         appDir = '.';
       }
       
       const runBatPath = `${appDir}\\run.bat`;
       
-      if (window.__TAURI__?.shell) {
-        const { Command } = window.__TAURI__.shell;
-        const cmd = new Command('cmd', ['/c', 'start', '', runBatPath]);
-        await cmd.spawn();
+      if (invoke) {
+        await invoke('execute_script', { path: runBatPath });
         alert(`正在启动: ${runBatPath}`);
       } else {
         alert(`在 Tauri 应用中运行时将启动: ${runBatPath}`);
