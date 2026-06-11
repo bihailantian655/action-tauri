@@ -1,6 +1,9 @@
 // 配置数据存储
 let configs = [];
 
+// 运行中的脚本进程
+let runningProcesses = {};
+
 // 获取 Tauri invoke API（多种兜底）
 function getTauriInvoke() {
   if (!window.__TAURI__) return null;
@@ -386,6 +389,16 @@ document.addEventListener('DOMContentLoaded', () => {
   initData();
   renderConfigList();
   
+  // 确保页面加载时没有选中任何卡片（移除默认选中状态）
+  setTimeout(() => {
+    // 移除所有卡片的selected和active类，确保没有默认高亮
+    document.querySelectorAll('.config-card').forEach(card => {
+      card.classList.remove('selected', 'active');
+      // 保留running类，因为可能真的有脚本在运行
+    });
+    updateControlButtons();
+  }, 0);
+  
   // 初始化图标选择器事件
   initIconPicker();
   
@@ -501,7 +514,11 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // 设置按钮
   document.getElementById('settingsBtn').addEventListener('click', () => {
-    alert('设置功能开发中...');
+    // 打开主题设置弹窗
+    const modal = document.getElementById('themeModal');
+    if (modal) {
+      modal.classList.add('show');
+    }
   });
   
   // 运行程序本目录下的 run.bat
@@ -714,3 +731,398 @@ function setIconPickerSelection(icon) {
     }
   });
 }
+
+// ========== 主题切换功能 ==========
+
+// 主题配置
+let themeConfig = {
+  mode: 'light', // light, dark, auto
+  darkStartTime: '19:00',
+  darkEndTime: '07:00'
+};
+
+let themeInterval = null;
+
+// 加载主题配置
+function loadThemeConfig() {
+  const saved = localStorage.getItem('themeConfig');
+  if (saved) {
+    try {
+      themeConfig = JSON.parse(saved);
+    } catch (e) {
+      console.error('加载主题配置失败:', e);
+    }
+  }
+}
+
+// 保存主题配置
+function saveThemeConfig() {
+  localStorage.setItem('themeConfig', JSON.stringify(themeConfig));
+}
+
+// 应用主题
+function applyTheme(mode) {
+  const body = document.body;
+  
+  if (mode === 'dark') {
+    body.classList.add('dark-mode');
+  } else {
+    body.classList.remove('dark-mode');
+  }
+  
+  // 更新主题切换按钮图标
+  updateThemeButton(mode);
+}
+
+// 更新主题切换按钮图标
+function updateThemeButton(mode) {
+  const themeBtn = document.getElementById('themeToggleBtn');
+  if (!themeBtn) return;
+  
+  const icon = themeBtn.querySelector('svg');
+  if (!icon) return;
+  
+  if (mode === 'dark') {
+    // 显示太阳图标（表示当前是夜间模式，点击切换到白天）
+    icon.innerHTML = `
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    `;
+    themeBtn.title = '切换到白天模式';
+  } else {
+    // 显示月亮图标（表示当前是白天模式，点击切换到夜间）
+    icon.innerHTML = `
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    `;
+    themeBtn.title = '切换到夜间模式';
+  }
+}
+
+// 检查当前时间是否应该使用夜间模式
+function shouldUseDarkMode() {
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  
+  const [startHour, startMin] = themeConfig.darkStartTime.split(':').map(Number);
+  const [endHour, endMin] = themeConfig.darkEndTime.split(':').map(Number);
+  
+  const startMinutes = startHour * 60 + startMin;
+  const endMinutes = endHour * 60 + endMin;
+  
+  // 如果开始时间早于结束时间（如 19:00 - 07:00）
+  if (startMinutes > endMinutes) {
+    return currentMinutes >= startMinutes || currentMinutes < endMinutes;
+  }
+  // 如果开始时间晚于结束时间（如 07:00 - 19:00）
+  return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+}
+
+// 更新自动主题
+function updateAutoTheme() {
+  if (themeConfig.mode === 'auto') {
+    const shouldBeDark = shouldUseDarkMode();
+    applyTheme(shouldBeDark ? 'dark' : 'light');
+  }
+}
+
+// 启动自动主题检查
+function startAutoThemeCheck() {
+  // 清除之前的定时器
+  if (themeInterval) {
+    clearInterval(themeInterval);
+  }
+  
+  // 每分钟检查一次
+  themeInterval = setInterval(updateAutoTheme, 60000);
+  
+  // 立即执行一次
+  updateAutoTheme();
+}
+
+// 初始化主题
+function initTheme() {
+  loadThemeConfig();
+  
+  // 设置弹窗中的选项
+  document.querySelectorAll('input[name="themeMode"]').forEach(radio => {
+    radio.checked = radio.value === themeConfig.mode;
+  });
+  
+  document.getElementById('darkStartTime').value = themeConfig.darkStartTime;
+  document.getElementById('darkEndTime').value = themeConfig.darkEndTime;
+  
+  // 显示/隐藏自动时间设置
+  updateAutoTimeGroup();
+  
+  // 应用主题
+  if (themeConfig.mode === 'auto') {
+    updateAutoTheme();
+    startAutoThemeCheck();
+  } else {
+    applyTheme(themeConfig.mode);
+  }
+}
+
+// 更新自动时间组的显示
+function updateAutoTimeGroup() {
+  const autoTimeGroup = document.getElementById('autoTimeGroup');
+  const autoMode = document.querySelector('input[name="themeMode"][value="auto"]').checked;
+  
+  if (autoMode) {
+    autoTimeGroup.classList.add('show');
+  } else {
+    autoTimeGroup.classList.remove('show');
+  }
+}
+
+// 主题切换按钮点击事件
+document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
+  const modal = document.getElementById('themeModal');
+  if (modal) {
+    modal.classList.add('show');
+  }
+});
+
+// 主题模式选项变化事件
+document.querySelectorAll('input[name="themeMode"]').forEach(radio => {
+  radio.addEventListener('change', updateAutoTimeGroup);
+});
+
+// 关闭主题弹窗
+document.getElementById('closeThemeModal')?.addEventListener('click', () => {
+  const modal = document.getElementById('themeModal');
+  if (modal) {
+    modal.classList.remove('show');
+  }
+});
+
+document.getElementById('themeCancelBtn')?.addEventListener('click', () => {
+  const modal = document.getElementById('themeModal');
+  if (modal) {
+    modal.classList.remove('show');
+  }
+});
+
+// 保存主题设置
+document.getElementById('themeSaveBtn')?.addEventListener('click', () => {
+  const mode = document.querySelector('input[name="themeMode"]:checked')?.value || 'light';
+  const darkStartTime = document.getElementById('darkStartTime').value || '19:00';
+  const darkEndTime = document.getElementById('darkEndTime').value || '07:00';
+  
+  themeConfig.mode = mode;
+  themeConfig.darkStartTime = darkStartTime;
+  themeConfig.darkEndTime = darkEndTime;
+  
+  saveThemeConfig();
+  
+  // 应用新的主题设置
+  if (mode === 'auto') {
+    updateAutoTheme();
+    startAutoThemeCheck();
+  } else {
+    applyTheme(mode);
+    // 如果之前有定时器，清除它
+    if (themeInterval) {
+      clearInterval(themeInterval);
+      themeInterval = null;
+    }
+  }
+  
+  // 关闭弹窗
+  const modal = document.getElementById('themeModal');
+  if (modal) {
+    modal.classList.remove('show');
+  }
+});
+
+// 页面加载完成后初始化主题
+document.addEventListener('DOMContentLoaded', initTheme);
+
+// ========== 脚本运行控制功能 ==========
+
+// 运行选中的脚本
+async function runSelectedScript() {
+  const selectedCard = document.querySelector('.config-card.selected');
+  if (!selectedCard) {
+    alert('请先选中一个配置项');
+    return;
+  }
+  
+  const configId = selectedCard.dataset.id;
+  const config = configs.find(c => c.id === configId);
+  
+  if (!config || !config.url) {
+    alert('配置项没有设置脚本路径');
+    return;
+  }
+  
+  // 检查是否已有脚本在运行
+  if (Object.keys(runningProcesses).length > 0) {
+    const runningId = Object.keys(runningProcesses)[0];
+    
+    // 如果是同一个脚本，不做任何操作
+    if (runningId === configId) {
+      alert('该脚本已经在运行中');
+      return;
+    }
+    
+    // 如果是不同脚本，提示用户是否停止当前运行的脚本
+    const confirmStop = confirm('已有脚本在运行中，是否先停止它再运行新脚本？');
+    if (!confirmStop) {
+      return;
+    }
+    
+    // 停止当前运行的脚本
+    await stopScriptById(runningId);
+  }
+  
+  try {
+    const invoke = getTauriInvoke();
+    if (!invoke) {
+      alert('无法执行脚本：Tauri API不可用');
+      return;
+    }
+    
+    // 执行脚本
+    const result = await invoke('execute_script', { path: config.url });
+    
+    // 记录进程ID
+    if (result && result.pid) {
+      runningProcesses[configId] = result.pid;
+      
+      // 更新UI状态
+      selectedCard.classList.add('running');
+      updateControlButtons();
+      
+      alert(`脚本已启动，进程ID: ${result.pid}`);
+    }
+  } catch (error) {
+    alert(`运行脚本失败: ${error.message}`);
+  }
+}
+
+// 根据ID停止脚本
+async function stopScriptById(configId) {
+  const pid = runningProcesses[configId];
+  if (!pid) return;
+  
+  try {
+    const invoke = getTauriInvoke();
+    if (invoke) {
+      await invoke('kill_process', { pid: pid });
+    }
+  } catch (e) {
+    console.error('停止脚本失败:', e);
+  }
+  
+  // 清除进程记录
+  delete runningProcesses[configId];
+  
+  // 更新UI状态
+  const card = document.querySelector(`.config-card[data-id="${configId}"]`);
+  if (card) {
+    card.classList.remove('running');
+  }
+}
+
+// 停止选中的脚本
+async function stopSelectedScript() {
+  const selectedCard = document.querySelector('.config-card.selected');
+  if (!selectedCard) {
+    alert('请先选中一个配置项');
+    return;
+  }
+  
+  const configId = selectedCard.dataset.id;
+  const pid = runningProcesses[configId];
+  
+  if (!pid) {
+    alert('没有正在运行的脚本');
+    return;
+  }
+  
+  try {
+    const invoke = getTauriInvoke();
+    if (!invoke) {
+      alert('无法停止脚本：Tauri API不可用');
+      return;
+    }
+    
+    // 终止进程
+    await invoke('kill_process', { pid: pid });
+    
+    // 清除进程记录
+    delete runningProcesses[configId];
+    
+    // 更新UI状态
+    selectedCard.classList.remove('running');
+    updateControlButtons();
+    
+    alert('脚本已停止');
+  } catch (error) {
+    alert(`停止脚本失败: ${error.message}`);
+  }
+}
+
+// 更新控制按钮状态
+function updateControlButtons() {
+  const selectedCard = document.querySelector('.config-card.selected');
+  const startBtn = document.getElementById('startScriptBtn');
+  const stopBtn = document.getElementById('stopScriptBtn');
+  
+  if (!selectedCard) {
+    startBtn.disabled = true;
+    stopBtn.disabled = true;
+    return;
+  }
+  
+  const configId = selectedCard.dataset.id;
+  const isRunning = runningProcesses[configId] !== undefined;
+  
+  startBtn.disabled = isRunning;
+  stopBtn.disabled = !isRunning;
+}
+
+// 更新选中状态
+function updateSelection(card) {
+  // 移除其他卡片的选中状态
+  document.querySelectorAll('.config-card').forEach(c => {
+    c.classList.remove('selected');
+  });
+  
+  // 添加当前卡片的选中状态
+  card.classList.add('selected');
+  
+  // 更新控制按钮状态
+  updateControlButtons();
+}
+
+// 开始按钮点击事件
+document.getElementById('startScriptBtn')?.addEventListener('click', runSelectedScript);
+
+// 停止按钮点击事件
+document.getElementById('stopScriptBtn')?.addEventListener('click', stopSelectedScript);
+
+// 配置卡片点击事件（用于选中）
+document.addEventListener('click', (e) => {
+  const card = e.target.closest('.config-card');
+  if (card) {
+    updateSelection(card);
+  }
+});
+
+// 页面加载完成后初始化控制按钮状态
+document.addEventListener('DOMContentLoaded', () => {
+  // 确保页面加载时没有选中任何卡片
+  document.querySelectorAll('.config-card').forEach(c => {
+    c.classList.remove('selected');
+  });
+  updateControlButtons();
+});

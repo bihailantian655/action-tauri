@@ -11,7 +11,7 @@
     <!-- 顶部导航栏 -->
     <header class="header">
       <div class="header-left">
-        <span class="app-icon">⚙️</span>
+
         <span class="app-name">CC Switch</span>
         <button class="nav-btn" id="settingsBtn" title="设置">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -29,6 +29,21 @@
           </svg>
           <span class="btn-text">运行</span>
         </button>
+        
+        <!-- 脚本控制按钮 -->
+        <button class="nav-btn control-btn start-btn" id="startScriptBtn" title="开始运行选中脚本" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span class="btn-text">开始</span>
+        </button>
+        <button class="nav-btn control-btn stop-btn" id="stopScriptBtn" title="停止运行选中脚本" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="6" y="4" width="12" height="16"></rect>
+          </svg>
+          <span class="btn-text">停止</span>
+        </button>
+        
         <button class="nav-btn" title="功能1">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 20h9"></path>
@@ -61,11 +76,17 @@
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
         </button>
-        <button class="nav-btn" title="功能6">
+        <button class="nav-btn" title="主题切换" id="themeToggleBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 20V10"></path>
-            <path d="M8 20V4"></path>
-            <path d="M18 20a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"></path>
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
           </svg>
         </button>
       </div>
@@ -80,6 +101,53 @@
         </button>
       </div>
     </header>
+    
+    <!-- 主题设置弹窗 -->
+    <div class="modal-overlay" id="themeModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>主题设置</h3>
+          <button class="modal-close" id="closeThemeModal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>主题模式</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="themeMode" value="light" checked>
+                <span>☀️ 白天模式</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="themeMode" value="dark">
+                <span>🌙 夜间模式</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="themeMode" value="auto">
+                <span>🕐 自动切换</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-group" id="autoTimeGroup">
+            <label>自动切换时间</label>
+            <div class="time-input-group">
+              <input type="time" id="darkStartTime" value="19:00" class="time-input">
+              <span class="time-separator">至</span>
+              <input type="time" id="darkEndTime" value="07:00" class="time-input">
+            </div>
+            <p class="form-hint">在指定时间范围内自动切换为夜间模式</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="themeCancelBtn">取消</button>
+          <button class="btn btn-primary" id="themeSaveBtn">保存</button>
+        </div>
+      </div>
+    </div>
     
     <!-- 配置列表 -->
     <main class="main-content">

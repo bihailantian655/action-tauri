@@ -3,11 +3,17 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
+use std::process::{Command, Stdio};
 
 #[derive(Serialize, Deserialize)]
 struct DirEntry {
     name: String,
     is_dir: bool,
+}
+
+#[derive(Serialize)]
+struct ExecuteResult {
+    pid: u32,
 }
 
 #[tauri::command]
@@ -56,13 +62,52 @@ fn remove_file(path: String) -> Result<(), String> {
         .map_err(|e| format!("删除文件失败: {}", e))
 }
 
+#[tauri::command]
+fn execute_script(path: String) -> Result<ExecuteResult, String> {
+    let script_path = Path::new(&path);
+    
+    if !script_path.exists() {
+        return Err(format!("脚本文件不存在: {}", path));
+    }
+    
+    let child = Command::new("powershell")
+        .arg("-Command")
+        .arg(&format!(". '{}'", path))
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .map_err(|e| format!("启动脚本失败: {}", e))?;
+    
+    Ok(ExecuteResult { pid: child.id() })
+}
+
+#[tauri::command]
+fn kill_process(pid: u32) -> Result<(), String> {
+    let output = Command::new("taskkill")
+        .arg("/F")
+        .arg("/T")
+        .arg("/PID")
+        .arg(pid.to_string())
+        .output()
+        .map_err(|e| format!("终止进程失败: {}", e))?;
+    
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("终止进程失败: {}", stderr));
+    }
+    
+    Ok(())
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             read_dir,
             read_text_file,
             write_text_file,
-            remove_file
+            remove_file,
+            execute_script,
+            kill_process
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
